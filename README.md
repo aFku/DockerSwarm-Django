@@ -49,11 +49,15 @@ To do this I will use Docker Swarm and Django backend with MariaDB database.
   vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
   ONBOOT=yes
   ```
-  - Open ports 8080/tcp - HTTP, 5000/tcp - Docker image registry, 2337/tcp - Docker Swarm with firewall-cmd:
+  - Open ports 8080/tcp - HTTP, 5000/tcp - Docker image registry, 2376,7946,2377/tcp and 4789,7946/udp - Docker Swarm with firewall-cmd on each node:
   ```
-  firewall-cmd --zone=public --premanent --add-port=8080/tcp
-  firewall-cmd --zone=public --premanent --add-port=5000/tcp
-  firewall-cmd --zone=public --premanent --add-port=2337/tcp
+  firewall-cmd --zone=public --permanent --add-port=8080/tcp
+  firewall-cmd --zone=public --permanent --add-port=5000/tcp
+  firewall-cmd --zone=public --permanent --add-port=2376/tcp 
+  firewall-cmd --zone=public --permanent --add-port=7946/tcp
+  firewall-cmd --zone=public --permanent --add-port=2377/tcp
+  firewall-cmd --zone=public --permanent --add-port=7946/udp
+  firewall-cmd --zone=public --permanent --add-port=4789/udp
   ```
   - Disable SELINUX:
   ```
@@ -84,6 +88,42 @@ To do this I will use Docker Swarm and Django backend with MariaDB database.
   and only make some modification in system.
   
   ### 3. Create other nodes:
+  Go to your hypervisor and just clone 4 times Master1. Change names of cloned machines. Do not forget about changing SSH and HTTP ports in NAT settings. In my case:
+```
+Master1 - 127.0.0.1:2222,8080 ---> Master1:22,8080
+Master2 - 127.0.0.1:2223,8081 ---> Master2:22,8080
+Worker1 - 127.0.0.1:2224,8082 ---> Worker1:22,8080
+Worker2 - 127.0.0.1:2225,8083 ---> Worker2:22,8080
+Worker3 - 127.0.0.1:2226,8084 ---> Worker2:22,8080
+```
+This configuration allow us to access ports 22 and 8080 using only loopback address on hypervisor host.
+
+  On each node You have to change IP of internal network interface according lines we add to /etc/hosts on Master1 and change hostname in /etc/hostname, as we did this before.
   
+  ### 4. Create Docker Swarm cluster:
+  - On Master1 you have to execute command:
+  ```
+  docker swarm init --advertise-addr 10.0.0.1
+  ```  
+  It will initalize docker cluster and create token which we will use to add workers.
+  - Join worker o cluster, by executing command on worker node:
+  ```
+  docker swarm join --token <your token> 10.0.0.1:2377
+  ```
+  - Execute below command on Master1:
+  ```
+  docker swarm join-token manager
+  ```
+  Copy new token and add Master2 to cluster as secondary manager:
+  ```
+  docker swarm join --token <your new manager token> 10.0.0.1:2377
+  ```
+  
+  
+  Now we have working cluster with 2 managers and 3 workers. Congratulations :)
+  
+  ### 5. Create registry service:
+  
+
   
   
