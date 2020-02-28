@@ -1,0 +1,54 @@
+version: "3"
+
+services:
+
+        django-site:
+                image: Master:5000/questionsite
+                ports:
+                        - 8080:8080
+                deploy:
+                        replicas: 3
+                depends_on:
+                        - database
+                networks:
+                        - site
+                        - bridge
+                command: ["./wait-for-it.sh", "database:3306", "--", "python3", "manage.py", "runserver", "0.0.0.0:8080"]
+
+        database:
+                image: mariadb:latest
+                ports:
+                        - 3306:3306
+                networks:
+                        - site
+                deploy:
+                        replicas: 1
+                environment:
+                        MYSQL_HOST: "database"
+                        MYSQL_DATABASE: 'djangosite'
+                        MYSQL_USER: 'xd'
+                        MYSQL_PASSWORD: 'password'
+                        MYSQL_ROOT_PASSWORD: 'password'
+                        MYSQL_ROOT_HOST: "%"
+                        MYSQL_PORT: "3306"
+
+                volumes:
+                        - db_loc:/var/lib/mysql 
+networks:
+        site:
+                driver: overlay
+                external: true
+        bridge:
+                driver: local
+                external: true
+
+volumes:
+         db_loc:
+                 driver: local
+
+#        db_vol:
+#                driver: vieux/sshfs
+#                driver_opts:
+#                        allow_other: ""
+#                        sshcmd: "test@10.10.0.1:/tmp"
+#                        password: "1234"
