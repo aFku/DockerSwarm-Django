@@ -3,7 +3,7 @@ version: "3"
 services:
 
         django-site:
-                image: Master:5000/questionsite
+                image: Master1:5000/questionsite
                 ports:
                         - 8080:8080
                 deploy:
