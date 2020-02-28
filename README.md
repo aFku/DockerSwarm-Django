@@ -123,7 +123,42 @@ This configuration allow us to access ports 22 and 8080 using only loopback addr
   Now we have working cluster with 2 managers and 3 workers. Congratulations :)
   
   ### 5. Create registry service:
+  Now we will set up unsecured registry service to share images among other nodes with HTTP protocol.
+  - To use HTTP insted HTTPS (which is default protocol to share images) we need add nodes with registry service to "insecure-registries"  group. We will host registry only on manager nodes, so in /etc/docker/daemon.json we have to add following lines (if daemon.json doesn`t exists there, just create it) on all nodes:
+  ```
+  vi /etc/docker/daemon.json
+  {
+    "insecure-registries" : ["Master1:5000", "Master2:5000"]
+  }
+  ```
+  after that, restart docker service with systemctl:
+  ```
+  systemctl restart docker
+  ```
+  - create registry service:
+  ```
+  docker service create --name registry --publish=5000:5000 --constraint=node.role==manager registry:latest
+  ```
+  ### 6. Prepare Django app for containerization:
+  Everything what you will see in this paragraph, must be done on Master node.
+  - If your system release doesn`t contain git commands, install they with:
+  ```
+  dnf install git -y
+  ```
+  - Download app from my repo:
+  ```
+  git clone https://github.com/aFku/Django-MultiApp.git
+  ```
+  - Download wait-for-it.sh bash script from vishnubob`s repo from https://github.com/vishnubob/wait-for-it . This script won`t let Django app be started before Database:
+  ```
+  git clone https://github.com/vishnubob/wait-for-it
+  cp wait-for-it/wait-for-it.sh .
+  rm -rf wait-for-it
+  ```
+  - Get dockerfile from current repository:
+  ```
   
+
 
   
   
