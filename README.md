@@ -151,7 +151,7 @@ This configuration allow us to access ports 22 and 8080 using only loopback addr
   ```
   - Download wait-for-it.sh bash script from vishnubob's repo from https://github.com/vishnubob/wait-for-it . This script won't let Django app be started before Database:
   ```
-  git clone https://github.com/vishnubob/wait-for-it
+  git clone https://github.com/vishnubob/wait-for-it.git
   cp wait-for-it/wait-for-it.sh .
   rm -rf wait-for-it
   ```
@@ -159,10 +159,34 @@ This configuration allow us to access ports 22 and 8080 using only loopback addr
   ```
   git clone https://github.com/aFku/DockerSwarm-Django.git
   cp DockerSwarm-Django/dockerfile .
-  docker image build -t Master1:5000/django .
-  docker push Master1:5000/django
+  docker image build -t Master1:5000/questionsite .
+  docker push Master1:5000/questionsite
   ```
   It is necessarily to store Django-MultiApp dir, dockerfile and wait-for-it.sh in one directory.
+  
+  ### 7. Deploying
+  -First create new overlay network for 12communication beetwen nodes:
+  ```
+  docker network create --driver overlay site
+  ```
+  -To deploy our stack, go to DockerSwarm-Django directory and execute command:
+  ```
+  docker stack deploy --compose-file=site_swarm.yml django-stack
+  ```
+  -Now to check on which node tasks were deployed run:
+  ```
+  docker stack ps django-stack
+  ```
+  ### 8. Verification
+  - Go to hypervisor's host, open browser and type follow line in url field for each node:
+  ```
+  127.0.0.1:<node's translated http port>/News
+  ```
+  Each time you should see website made with Django framework.
+  
+  ## Plans for the future:
+  - Common storage for many database instances (maybe with sshfs)
+  - Add NGINX as a web server
   
   
 
