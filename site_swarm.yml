@@ -45,10 +45,3 @@ networks:
 volumes:
          db_loc:
                  driver: local
-
-#        db_vol:
-#                driver: vieux/sshfs
-#                driver_opts:
-#                        allow_other: ""
-#                        sshcmd: "test@10.10.0.1:/tmp"
-#                        password: "1234"
