@@ -30,11 +30,12 @@ To do this I will use Docker Swarm and Django backend with MariaDB database.
   vi /etc/hosts
   127.0.0.1 localhost
   ::1 localhost
-  Master1 10.0.0.1
-  Master2 10.0.0.2
-  Worker1 10.0.0.3
-  Worker2 10.0.0.4
-  Worker3 10.0.0.5
+  
+  10.0.0.1 Master1
+  10.0.0.2 Master2
+  10.0.0.3 Worker1
+  10.0.0.4 Worker2
+  10.0.0.5 Worker3
   ```
   - Set up static IP for internal network interface (In my case it is second interface):
   ```
